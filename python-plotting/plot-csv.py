@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-file = r"C:\Users\OLIVI\work\dsp-playground\python-plotting\csv\signal2.csv"  # change this to your file
+file = r"C:\Users\OLIVI\work\dsp-playground\python-plotting\csv\signal5.csv"  # change this to your file
 
 df = pd.read_csv(file)
 
