@@ -46,8 +46,8 @@ int main()
 
     generator gen2;
 
-    gen2.setSampleRate(100);
-    gen2.setNumSamples(20);
+    gen2.setSampleRate(1000);
+    gen2.setNumSamples(1000);
 
     gen2.addCosine({ 1.0, 1.0 });
 
@@ -63,8 +63,8 @@ int main()
 
     generator gen3;
 
-    gen3.setSampleRate(100);
-    gen3.setNumSamples(20);
+    gen3.setSampleRate(1000);
+    gen3.setNumSamples(1000);
 
     gen3.addSine({ 2.0, 1.0 });
     gen3.addCosine({ 5.0, 0.5 });
@@ -82,8 +82,8 @@ int main()
 
     generator gen4;
 
-    gen4.setSampleRate(100);
-    gen4.setNumSamples(20);
+    gen4.setSampleRate(1000);
+    gen4.setNumSamples(1000);
     gen4.setNoiseAmp(0.2);
 
     auto signal4 = gen4.generate();
@@ -100,7 +100,7 @@ int main()
     generator gen5;
 
     gen5.setSampleRate(1000);
-    gen5.setNumSamples(30);
+    gen5.setNumSamples(1000);
     gen5.setNoiseAmp(0.1);
 
     gen5.addSine({ 10.0, 1.0 });
