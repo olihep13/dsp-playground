@@ -67,7 +67,7 @@ std::vector<double> generator::generate()
 			signal_value += tone.amp * std::cos(2 * PI * tone.freq * t);
 
 		for (const Tone& tone : this->sines)
-			signal_value += tone.amp * std::sin(2 * PI * tone.freq * i);
+			signal_value += tone.amp * std::sin(2 * PI * tone.freq * t);
 
 		double noise_value = dist(gen);
 		signal_value += noise_value * this->noiseAmp;

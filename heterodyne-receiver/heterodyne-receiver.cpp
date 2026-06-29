@@ -1,19 +1,22 @@
-﻿// heterodyne-receiver.cpp : Defines the entry point for the application.
-//
-
-#include "heterodyne-receiver.h"
+﻿#include "heterodyne-receiver.h"
 #include "../signal/generator.h"
+#include <fstream>
+#include <vector>
+#include <string>
 
 using namespace std;
 
-void printSignal(const std::vector<double>& signal)
+void writeCSV(const std::string& filename, const std::vector<double>& signal, double sampleRate)
 {
+    std::ofstream file(filename);
+
+    file << "index,time,amplitude\n";
+
     for (size_t i = 0; i < signal.size(); i++)
     {
-        std::cout << i << ": " << signal[i] << std::endl;
+        double t = static_cast<double>(i) / sampleRate;
+        file << i << "," << t << "," << signal[i] << "\n";
     }
-
-    std::cout << "-------------------------------------\n";
 }
 
 int main()
@@ -26,15 +29,14 @@ int main()
 
     generator gen1;
 
-    gen1.setSampleRate(100);
-    gen1.setNumSamples(20);
+    gen1.setSampleRate(1000);
+    gen1.setNumSamples(1000);
 
     gen1.addSine({ 1.0, 1.0 });
 
     auto signal1 = gen1.generate();
 
-    printSignal(signal1);
-
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal1.csv", signal1, 100);
 
     //==================================================
     // Test 2: Pure cosine wave
@@ -51,8 +53,7 @@ int main()
 
     auto signal2 = gen2.generate();
 
-    printSignal(signal2);
-
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal2.csv", signal2, 100);
 
     //==================================================
     // Test 3: Sine + Cosine
@@ -70,7 +71,7 @@ int main()
 
     auto signal3 = gen3.generate();
 
-    printSignal(signal3);
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal3.csv", signal3, 100);
 
 
     //==================================================
@@ -87,7 +88,7 @@ int main()
 
     auto signal4 = gen4.generate();
 
-    printSignal(signal4);
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal4.csv", signal4, 100);
 
 
     //==================================================
@@ -108,7 +109,7 @@ int main()
 
     auto signal5 = gen5.generate();
 
-    printSignal(signal5);
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal5.csv", signal5, 1000);
 
-	return 0;
+    return 0;
 }

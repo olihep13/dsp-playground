@@ -21,7 +21,6 @@ add_executable (heterodyne-receiver
 "../dsp/filter.cpp"
 "../dsp/fft.cpp"
 
-"../viz/plot.cpp"
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
