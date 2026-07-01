@@ -14,5 +14,7 @@ private:
 	double numSamples;
 	double cutoffFrequency0;
 	double cutoffFrequency1;
+	double normalizedCutoffFrequency0;
+	double normalizedCutoffFrequency1;
 	std::vector<double> filterSignal;
 };
