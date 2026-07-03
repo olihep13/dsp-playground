@@ -12,7 +12,7 @@ double sinc_helper(double x)
 	return std::sin(PI * x) / (PI * x);
 }
 
-filter::filter(const double& sampleRate, const double& numSamples, const double& cutoffFrequency0, const bool& bandPass, const double& cutoffFrequency1 = 0)
+filter::filter(const double& sampleRate, const double& numSamples, const double& cutoffFrequency0, const bool& bandPass, const double& cutoffFrequency1)
 {
 	this->sampleRate = sampleRate;
 	this->numSamples = numSamples;

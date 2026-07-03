@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "signal.h"
+#include "../dsp/dsp.h"
 #include <random>
 
 class generator

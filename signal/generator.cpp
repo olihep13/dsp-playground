@@ -2,7 +2,7 @@
 #include <vector>
 #include <random>
 #include "generator.h"
-#include "signal.h"
+#include "../dsp/dsp.h"
 
 generator::generator()
 	: gen(std::random_device{}()),

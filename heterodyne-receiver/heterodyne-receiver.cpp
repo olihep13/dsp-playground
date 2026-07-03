@@ -1,8 +1,12 @@
 ﻿#include "heterodyne-receiver.h"
 #include "../signal/generator.h"
+#include "../dsp/filter.h"
+#include "../dsp/fft.h"
+#include "../dsp/mixer.h"
 #include <fstream>
 #include <vector>
 #include <string>
+#include <complex>
 
 using namespace std;
 
@@ -19,97 +23,100 @@ void writeCSV(const std::string& filename, const std::vector<double>& signal, do
     }
 }
 
+void writeFFTCSV(
+    const std::string& filename,
+    const std::vector<std::complex<double>>& fftOutput,
+    double sampleRate)
+{
+    int N = fftOutput.size();
+
+    // our current fft output vector formatted as: 0 ... Fs/2 -Fs/2 ... 0
+    // fix by rotating the elements as below:
+    std::vector<std::complex<double>> rotatedFFTOutput;
+    for (int i = N/2;i < N;i++)
+    {
+        rotatedFFTOutput.push_back(fftOutput[i]);
+    }
+    for (int i = 0;i < N/2 +1;i++)
+    {
+        rotatedFFTOutput.push_back(fftOutput[i]);
+    }
+    std::ofstream file(filename);
+
+    file << "Frequency,Magnitude,Phase\n";
+
+    for (int k = 0; k < N; k++)
+    {
+        double frequency = (double)k * sampleRate / N;
+
+        double magnitude = std::abs(rotatedFFTOutput[k]);
+        double phase = std::arg(rotatedFFTOutput[k]);
+
+        file << frequency << ","
+            << magnitude << ","
+            << phase << "\n";
+    }
+
+    file.close();
+}
+
 int main()
 {
     //==================================================
-    // Test 1: Pure sine wave
+    // Test: Sinc function fft
     //==================================================
 
-    std::cout << "Test 1: Sine Wave\n";
+    // frequency resolution = Fs (sample/sec) / N (number of samples) = Hz amount per bin
 
-    generator gen1;
+    std::cout << "Test: Sinc function fft\n";
 
-    gen1.setSampleRate(1000);
-    gen1.setNumSamples(1000);
+    generator genMessage;
+    generator genSinusoidalCarrier;
 
-    gen1.addSine({ 1.0, 1.0 });
+    // so above, frequency resolution = 10000 (sample/sec) / 10000 (number of samples) = 1 Hz per bin
+    genMessage.setSampleRate(10000);
+    genMessage.setNumSamples(10000);
+    genSinusoidalCarrier.setSampleRate(10000);
+    genSinusoidalCarrier.setNumSamples(10000);
 
-    auto signal1 = gen1.generate();
+    // message
+    genMessage.addCosine({ 1, 1 }); // 1 Hz, A=1
+    auto messageSignal = genMessage.generate();
 
-    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal1.csv", signal1, 100);
+    // sinusoidal carrier, with carrier frequency at 10 Hz
+    genSinusoidalCarrier.addCosine({ 10, 1 }); // 10Hz == 10 bins in the graph, A=1
+    auto sinusoidalCarrierSignal = genSinusoidalCarrier.generate();
 
-    //==================================================
-    // Test 2: Pure cosine wave
-    //==================================================
+    std::vector<double> modulatedSignal;
+    // multiply our signals
+    for (int i = 0;i < 10000;i++)
+    {
+        modulatedSignal.push_back(1+messageSignal[i]*sinusoidalCarrierSignal[i]); // amplitude modulated signal
+    }
 
-    std::cout << "Test 2: Cosine Wave\n";
+    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\amSignal.csv", modulatedSignal, 10000);
 
-    generator gen2;
+    fft fastfft;
 
-    gen2.setSampleRate(1000);
-    gen2.setNumSamples(1000);
+    auto fftOfFilter = fastfft.fft_float(modulatedSignal); // output vector shows: 0 ... Fs/2 -Fs/2 ... 0
 
-    gen2.addCosine({ 1.0, 1.0 });
+    writeFFTCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\amSignalFFT.csv", fftOfFilter, 10000);
 
-    auto signal2 = gen2.generate();
+    mixer mixObj(10000, 2, 10000);
 
-    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal2.csv", signal2, 100);
+    auto mixedSignal = mixObj.mix(modulatedSignal);
 
-    //==================================================
-    // Test 3: Sine + Cosine
-    //==================================================
+    auto fftOfMixedSignal = fastfft.fft_float(mixedSignal); // output vector shows: 0 ... Fs/2 -Fs/2 ... 0
 
-    std::cout << "Test 3: Sine + Cosine\n";
+    writeFFTCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\mixedSignalFFT.csv", fftOfMixedSignal, 10000);
 
-    generator gen3;
+    // filter fft, unrelated
 
-    gen3.setSampleRate(1000);
-    gen3.setNumSamples(1000);
+    //filter filt(1000, 1000, 40);
+    //
+    //fftOfFilter = fastfft.fft_float(filt.filterSignal);
 
-    gen3.addSine({ 2.0, 1.0 });
-    gen3.addCosine({ 5.0, 0.5 });
-
-    auto signal3 = gen3.generate();
-
-    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal3.csv", signal3, 100);
-
-
-    //==================================================
-    // Test 4: Noise only
-    //==================================================
-
-    std::cout << "Test 4: Noise\n";
-
-    generator gen4;
-
-    gen4.setSampleRate(1000);
-    gen4.setNumSamples(1000);
-    gen4.setNoiseAmp(0.2);
-
-    auto signal4 = gen4.generate();
-
-    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal4.csv", signal4, 100);
-
-
-    //==================================================
-    // Test 5: Everything together
-    //==================================================
-
-    std::cout << "Test 5: Mixed Signal\n";
-
-    generator gen5;
-
-    gen5.setSampleRate(1000);
-    gen5.setNumSamples(1000);
-    gen5.setNoiseAmp(0.1);
-
-    gen5.addSine({ 10.0, 1.0 });
-    gen5.addSine({ 40.0, 0.4 });
-    gen5.addCosine({ 20.0, 0.7 });
-
-    auto signal5 = gen5.generate();
-
-    writeCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\signal5.csv", signal5, 1000);
+    //writeFFTCSV("C:\\Users\\OLIVI\\work\\dsp-playground\\python-plotting\\csv\\fftOfFilter.csv", fftOfFilter, 1000);
 
     return 0;
 }
