@@ -38,6 +38,16 @@ void generator::addCosine(const Tone& tone)
 	this->cosines.push_back(tone);
 }
 
+void generator::addAMSignalCosine(const std::vector<double>& messageSignal, const Tone& carrierTone, const double& modulationIndex)
+{
+	this->AMSignalCosines.push_back({ carrierTone, messageSignal, modulationIndex });
+}
+
+void generator::addAMSignalSines(const std::vector<double>& messageSignal, const Tone& carrierTone, const double& modulationIndex)
+{
+	this->AMSignalSines.push_back({ carrierTone, messageSignal, modulationIndex });
+}
+
 void generator::clearComponents()
 {
 	this->sampleRate = 0;
@@ -68,6 +78,12 @@ std::vector<double> generator::generate()
 
 		for (const Tone& tone : this->sines)
 			signal_value += tone.amp * std::sin(2 * PI * tone.freq * t);
+
+		for (const AMSignal& amSignal : this->AMSignalCosines)
+			signal_value += amSignal.CarrierTone.amp * (1 + amSignal.modulationIndex * amSignal.messageSignal[i]) * std::cos(2 * PI * amSignal.CarrierTone.freq * t);
+
+		for (const AMSignal& amSignal : this->AMSignalSines)
+			signal_value += amSignal.CarrierTone.amp * (1 + amSignal.modulationIndex * amSignal.messageSignal[i]) * std::sin(2 * PI * amSignal.CarrierTone.freq * t);
 
 		double noise_value = dist(gen);
 		signal_value += noise_value * this->noiseAmp;

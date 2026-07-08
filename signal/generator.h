@@ -19,6 +19,10 @@ public:
 
 	void addCosine(const Tone& tone);
 
+	void addAMSignalCosine(const std::vector<double>& messageSignal, const Tone& carrierTone, const double& modulationIndex);
+
+	void addAMSignalSines(const std::vector<double>& messageSignal, const Tone& carrierTone, const double& modulationIndex);
+
 	void clearComponents();
 
 	std::vector<double> generate();
@@ -30,5 +34,7 @@ private:
 	double noiseAmp;
 	std::vector<Tone> cosines;
 	std::vector<Tone> sines;
+	std::vector<AMSignal> AMSignalCosines;
+	std::vector<AMSignal> AMSignalSines;
 
 };

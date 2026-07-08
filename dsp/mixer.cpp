@@ -4,7 +4,7 @@
 #include <format>
 #include "dsp.h"
 
-mixer::mixer(const double& sampleRate, const double& localOscillatorFrequency, const double& numSamples)
+mixer::mixer(const double& sampleRate, const double& numSamples, const double& localOscillatorFrequency)
 {
 	this->sampleRate = sampleRate;
 	this->numSamples = numSamples;

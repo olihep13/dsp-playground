@@ -3,6 +3,7 @@
 #include "filter.h"
 #include <format>
 #include "dsp.h"
+#include <iostream>
 
 double sinc_helper(double x)
 {
@@ -37,6 +38,7 @@ filter::filter(const double& sampleRate, const double& numSamples, const double&
 			else
 			{
 				signal_value = 2 * (this->normalizedCutoffFrequency1 - this->normalizedCutoffFrequency0); // sinc is 1 at 0
+				std::cout << "Signal value for bandpass filter: " << signal_value << std::endl;
 			}
 
 			signal_value *= .5 - .5*std::cos((2*PI*i)/(this->numSamples-1)); //hann window
@@ -59,6 +61,8 @@ filter::filter(const double& sampleRate, const double& numSamples, const double&
 			else
 			{
 				signal_value = 2 * this->normalizedCutoffFrequency0; // sinc at 0 is 1
+				std::cout << "Signal value for lowpass filter: " << signal_value << std::endl;
+				std::cout << "Normalized cutoff frequency: " << this->normalizedCutoffFrequency0 << std::endl;
 			}
 			
 			signal_value *= .5 - .5 * std::cos((2 * PI * i) / (this->numSamples - 1)); //hann window
