@@ -1,2 +1,2 @@
 # dsp-playground
-Interesting DSP math implemented in software
+fun basic DSP math implemented in software
