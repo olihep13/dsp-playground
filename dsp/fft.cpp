@@ -8,7 +8,7 @@ fft::fft()
 {
 }
 
-std::vector<std::complex<double>> fft::fft_float(std::vector<double>& time_domain_signal)
+std::vector<std::complex<double>> fft::dft_float(std::vector<double>& time_domain_signal)
 {
 	const int N = time_domain_signal.size();
 

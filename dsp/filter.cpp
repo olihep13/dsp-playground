@@ -13,21 +13,23 @@ double sinc_helper(double x)
 	return std::sin(PI * x) / (PI * x);
 }
 
-filter::filter(const double& sampleRate, const double& numSamples, const double& cutoffFrequency0, const bool& bandPass, const double& cutoffFrequency1)
+filter::filter(const double& sampleRate, const int& filterSize, const double& cutoffFrequency0, const bool& bandPass, const double& cutoffFrequency1)
 {
 	this->sampleRate = sampleRate;
-	this->numSamples = numSamples;
+	this->filterSize = filterSize;
 	this->cutoffFrequency0 = cutoffFrequency0;
 	this->cutoffFrequency1 = cutoffFrequency1;
 	this->normalizedCutoffFrequency0 = this->cutoffFrequency0 / this->sampleRate;
 	this->normalizedCutoffFrequency1 = this->cutoffFrequency1 / this->sampleRate;
 
+	std::cout << "filter size" << (this->filterSize / 2) << std::endl;
+
 	if (bandPass)
 	{
 		// BANDPASS
-		for (int i = 0;i < this->numSamples;i++)
+		for (int i = 0;i < this->filterSize;i++)
 		{
-			double index = i - (this->numSamples / 2);
+			double index = i - (this->filterSize / 2);
 			double signal_value = 0;
 
 			if (index != 0)
@@ -41,7 +43,7 @@ filter::filter(const double& sampleRate, const double& numSamples, const double&
 				std::cout << "Signal value for bandpass filter: " << signal_value << std::endl;
 			}
 
-			signal_value *= .5 - .5*std::cos((2*PI*i)/(this->numSamples-1)); //hann window
+			signal_value *= .5 - .5*std::cos((2*PI*i)/(this->filterSize-1)); //hann window
 
 			filterSignal.push_back(signal_value);
 		}
@@ -49,9 +51,9 @@ filter::filter(const double& sampleRate, const double& numSamples, const double&
 	else
 	{
 		// LOWPASS
-		for (int i = 0;i < this->numSamples;i++)
+		for (int i = 0;i < this->filterSize;i++)
 		{
-			double index = i - (this->numSamples / 2);
+			double index = i - (this->filterSize / 2);
 			double signal_value = 0;
 
 			if (index != 0)
@@ -65,29 +67,36 @@ filter::filter(const double& sampleRate, const double& numSamples, const double&
 				std::cout << "Normalized cutoff frequency: " << this->normalizedCutoffFrequency0 << std::endl;
 			}
 			
-			signal_value *= .5 - .5 * std::cos((2 * PI * i) / (this->numSamples - 1)); //hann window
+			signal_value *= .5 - .5 * std::cos((2 * PI * i) / (this->filterSize - 1)); //hann window
 
 			filterSignal.push_back(signal_value);
 		}
+
+		double sum = 0;
+
+		for (double h : filterSignal)
+			sum += h;
+
+		for (double& h : filterSignal)
+			h /= sum;
+
+		std::cout << "filter sum " << sum << std::endl;
 	}
 }
 
 std::vector<double> filter::filterFIR(const std::vector<double>& inputSignal)
 {
-	// NOTE = my input vector and filter vector are assumed to be the same size
-	if (inputSignal.size() != numSamples)
-		throw std::runtime_error("Input signal has wrong length.");
-
+	const size_t N = inputSignal.size();
 	std::vector<double> outputSignal;
-	outputSignal.reserve(this->numSamples);
+	outputSignal.reserve(N);
 
-	for (int n = 0;n < this->numSamples;n++)
+	for (int n = 0;n < N;n++)
 	{
 		double sum = 0;
-		for (int k = 0;k < this->numSamples;k++)
+		for (int k = 0;k < this->filterSize;k++)
 		{
 			if (n - k >= 0)
-				sum += inputSignal[k] * filterSignal[n - k];
+				sum += inputSignal[n-k] * filterSignal[k];
 		}
 		outputSignal.push_back(sum);
 	}
