@@ -12,10 +12,10 @@ std::vector<std::complex<double>> fft::dft_float(std::vector<double>& time_domai
 {
 	const int N = time_domain_signal.size();
 
-	for (int i = 0;i < N;i++)
-	{
-		time_domain_signal[i] *= .5 - .5 * std::cos((2 * PI * i) / (N - 1)); //hann window
-	}
+	//for (int i = 0;i < N;i++)
+	//{
+	//	time_domain_signal[i] *= .5 - .5 * std::cos((2 * PI * i) / (N - 1)); //hann window
+	//}
 
 	std::vector<std::complex<double>> frequency_domain_signal;
 	frequency_domain_signal.reserve(N);
